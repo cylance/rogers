@@ -1,0 +1,53 @@
+syntax = "proto3";
+package rogers.sample;
+
+option optimize_for = SPEED;
+
+message Feature {
+    // type of variable
+    message Variable {
+        enum Type {
+            CATEGORICAL = 0; // values in a specific category
+            CONTINUOUS  = 1; // infinite number of values
+            DISCRETE    = 2; // limited to certain number of values
+            ORDINAL     = 3; // ordered variable, expects int value, 1, 2, 3, 4
+        }
+    }
+    // type of feature space
+    message Modality {
+        enum Type {
+            BYTES       = 0; // raw byte features
+            STATIC      = 1; // structural / static features
+            DYNAMIC     = 2; // behavioral / dynamic features
+            CONTEXTUAL  = 3; // contextual features
+        }
+    }
+
+    Variable.Type type = 1;
+    Modality.Type mode = 2;
+    Value value        = 3;
+}
+
+message Features {
+    string sha256                   = 1;
+    map<string, Feature> map        = 2;
+}
+
+message Struct {
+    map<string, Value> value = 1;
+}
+
+message List {
+    repeated Value value = 1;
+}
+
+message Value {
+    oneof value_oneof {
+        string string_value     = 1;
+        bool bool_value         = 2;
+        uint64 int_value        = 3;
+        double double_value     = 4;
+        Struct struct_value     = 5;
+        List list_value         = 6;
+    }
+}

@@ -1,0 +1,17 @@
+pefile==2017.11.5
+uvloop>=0.9.1,<1.0.0
+aiohttp>=2.3.5,<2.4.0
+aioodbc>=0.2.0,<0.3.0
+pandas>=0.21.1,<0.22.0
+numpy>=1.13.3,<1.14.0
+scipy>=1.0.0,<1.1.0
+scikit-learn>=0.19.1,<0.20.0
+ssdeep>=3.2,<3.3
+yara-python>=3.7.0,<3.8.0
+protobuf>=3.5.1,<3.6.0
+nmslib>=1.6.0,<1.7.0
+plotly>=2.2.3,<2.3.0
+networkx>=2.0.0,<2.1.0
+matplotlib>=2.1.1,<2.2.0
+pygraphviz>=1.3.1,<1.4.0
+-e git+https://github.com/facebookresearch/pysparnn.git@0f8f624119bea358ef9edd6d114d2d7ae3028494#egg=pysparnn
