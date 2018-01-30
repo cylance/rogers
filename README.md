@@ -3,7 +3,7 @@
 
 ![Mister Rogers](rogers.jpg "Rogers")
 
-`rogers` is a Python command-line tool for malware analysts that uses nearest neighbor search methods for malware similarity.
+`rogers` is a Python command-line tool that uses nearest neighbor search methods to perform malware similarity analysis.
 
 # Installation
 
