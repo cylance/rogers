@@ -10,13 +10,22 @@
 `rogers` is requires Python 3.6 and it only supported on Linux or OS X.
 
 ```
-$ pip install rogers
+$ pip install git+https://github.com/facebookresearch/pysparnn.git@0f8f624119bea358ef9edd6d114d2d7ae3028494#egg=pysparnn
+$ pip install git+https://github.com/cylance/rogers.git
 ```
 
 # Usage
+
+
+After intall initialize the sample database:
+
+```
+$ rogers db init
+```
 
 See command line flags for full usage.
 
 ```
 $ rogers -h
 ```
+
