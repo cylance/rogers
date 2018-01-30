@@ -15,7 +15,7 @@ $ pip install rogers
 
 # Usage
 
-Set command line flags for full usage
+See command line flags for full usage.
 
 ```
 $ rogers -h
