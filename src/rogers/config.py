@@ -52,7 +52,7 @@ def configure(cfg_path):
     settings['SAMPLE_DIR'] = os.path.abspath(config.get('rogers', 'sample_dir', fallback=DEFAULT_SAMPLE_DIR))
     settings['INDEX_DIR'] = os.path.abspath(config.get('rogers', 'index_dir', fallback=DEFAULT_INDEX_DIR))
 
-    settings['VT_API_KEY'] = config.get('virustotal', 'api_key', fallback=DEFAULT_INDEX_DIR)
+    settings['VT_API_KEY'] = config.get('virustotal', 'api_key', fallback='')
 
     sample_dir = settings.get('SAMPLE_DIR')
     index_dir = settings.get('INDEX_DIR')
