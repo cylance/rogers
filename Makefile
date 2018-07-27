@@ -1,42 +1,60 @@
-.PHONY: build test pylint clean env compile
-
-all : env test pylint build
-
 NAME := rogers
-PWD := $(shell pwd)
 VERSION := $(shell cat VERSION)
+SOURCES := $(shell find src -name '*.py')
+TARBALL := dist/$(NAME)-$(VERSION).tar.gz
 
-
-env:
-	python3 -m venv --copies env
-	env/bin/pip install -U pip
-	env/bin/pip install -r dev-requirements.txt
-	env/bin/pip install -r requirements.txt
-	env/bin/pip install -e .
-	git submodule update --init --recursive
+all: compile test clean-build build
 
 compile:
 	protoc -I=proto/ --python_out=src/rogers/data proto/features.proto
 
-test:
-	env/bin/nosetests tests/
+test: env
+	env/bin/pytest tests
 
-pylint:
-	env/bin/pylint --reports=y --disable=mixed-indentation,line-too-long,missing-docstring,too-many-public-methods,too-few-public-methods,import-error,no-name-in-module,not-callable,locally-disabled,duplicate-code,file-ignored --msg-template="{path}:{line}: [{msg_id}({symbol}), {obj}] {msg}" $(NAME) > pylint.out & exit 0
+# re-run tests when changes are made
+watch: env
+	source env/bin/activate && env/bin/ptw
 
-build:
+$(TARBALL): $(SOURCES) env
 	env/bin/python setup.py bdist_wheel
+	@ls dist/* | tail -n 1 | xargs echo "Created source tarball"
 
-install:
+build: $(TARBALL)
+
+install: env
 	env/bin/python setup.py install
 
-clean-env:
-	rm -rf env/
+env: requirements.txt dev-requirements.txt | env/tools-installed.flag
+	env/bin/pip install -r dev-requirements.txt
+	env/bin/pip install -r requirements.txt
+	env/bin/pip install -e .
+	@touch env
 
-clean:
+force-env: clean-env env
+
+clean: clean-tarball
 	rm -rf bin/
 	rm -rf dist/
 	rm -rf coverage.xml
 	rm -rf nosetests.xml
-	rm -rf pylint.out
 	rm -rf build/
+
+clean-env:
+	rm -rf env/
+
+clean-build:
+	rm -rf dist/
+
+clean-tarball:
+	rm -f $(TARBALL)
+
+# set aliases
+dev: env
+
+env/tools-installed.flag:
+	python3 -m venv --copies env
+	env/bin/pip install -U pip setuptools
+	git submodule update --init --recursive
+	@touch env/tools-installed.flag
+
+.PHONY: test test-integration watch clean clean-build clean-env clean-tarball force-env
