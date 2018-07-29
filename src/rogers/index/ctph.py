@@ -2,16 +2,17 @@
 
 Implementation based on https://www.virusbulletin.com/virusbulletin/2015/11/optimizing-ssdeep-use-scale/
 """
+from ..store import Database
+from ..logger import get_logger
+from .. import config as c
+from . import Index as BaseIndex
+
+
 import os
 import ssdeep
 import base64
 from struct import unpack
 
-from . import Index as BaseIndex
-
-from rogers.store import Database
-from rogers.logger import get_logger
-import rogers.config as c
 
 log = get_logger(__name__)
 

@@ -3,7 +3,7 @@
 from mock import patch
 
 
-import rogers.cli as cli
+import rogers.api as api
 
 
 def test_init():

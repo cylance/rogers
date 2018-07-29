@@ -1,15 +1,14 @@
 """ Base class for different nearest neighbor search methods
 """
+from .. import config as c
+from .. import store
+from ..logger import get_logger
+
 import os
 import numpy as np
 from sklearn.externals import joblib
 from importlib import import_module
 from operator import itemgetter
-
-import rogers.config as c
-import rogers.store as store
-
-from rogers.logger import get_logger
 
 
 log = get_logger(__name__)
@@ -28,15 +27,16 @@ def list_available_index():
     return l
 
 
-def init(name):
+def init(name, sample_class):
     """ Dynamically load a model class and instantiate
     :param name:
+    :param sample_class:
     :return:
     """
     try:
         index_mod_name = "rogers.index.%s" % name
         mod = import_module("rogers.index.%s" % name)
-        idx = mod.Index()
+        idx = mod.Index(sample_class)
     except ModuleNotFoundError:
         log.fatal("%s index is not available", name)
         raise SystemExit(-1)
@@ -51,12 +51,13 @@ class Index(object):
 
     name = 'base'
 
-    def __init__(self):
+    def __init__(self, sample_class):
         """ Base attributes
         """
         self.model = None
         self.index = None
         self.ys = None
+        self.sample_class = sample_class
         try:
             self.pipeline = joblib.load(c.index_path('pipeline.pkl'))
         except FileNotFoundError:
@@ -142,7 +143,7 @@ class Index(object):
         :return:
         """
         for nbr in neighbors:
-            sample = DB.load_sample(nbr['hashval'])
+            sample = DB.load_sample(nbr['hashval'], self.sample_class)
             result['neighbors'].append((sample, nbr['similarity']))
         return result
 
@@ -192,7 +193,7 @@ class Index(object):
                 if nbr['hashval'] not in query_hashvals:
                     neighbor_hashvals.add(nbr['hashval'])
 
-        neighbor_samples = DB.load_samples(list(neighbor_hashvals))
+        neighbor_samples = DB.load_samples(list(neighbor_hashvals), self.sample_class)
 
         if include_neighbors:
             nbr_multiple_results = list(map(lambda s: {'query': s,
@@ -206,7 +207,7 @@ class Index(object):
                     if nbr['hashval'] not in query_hashvals and nbr['hashval'] not in neighbor_hashvals:
                         expanded_neighbor_hashvals.add(nbr['hashval'])
 
-            neighbor_samples += DB.load_samples(list(expanded_neighbor_hashvals))
+            neighbor_samples += DB.load_samples(list(expanded_neighbor_hashvals),  self.sample_class)
 
             tmp_multiple_results += nbr_multiple_results
 

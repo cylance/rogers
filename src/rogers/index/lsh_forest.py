@@ -1,10 +1,10 @@
 """ LSH Forest using scikit-learn
 """
+from . import Index as BaseIndex
+from ..logger import get_logger
+
 from sklearn.neighbors import LSHForest
 
-from . import Index as BaseIndex
-
-from rogers.logger import get_logger
 
 log = get_logger(__name__)
 

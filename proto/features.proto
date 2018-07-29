@@ -1,5 +1,5 @@
 syntax = "proto3";
-package rogers.sample;
+package rogers.generated.features;
 
 option optimize_for = SPEED;
 

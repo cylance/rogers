@@ -1,10 +1,10 @@
 """ Configuration for Rogers
 """
+from .util import get_logger
+
 import os
 import configparser
 from os import path as path
-
-from rogers.logger import get_logger
 
 log = get_logger(__name__)
 

@@ -1,13 +1,13 @@
 """ Vectorizer pipelines
 """
+from .PEVectorizer import HeaderVectorizer, SymImportsVectorizer, SymExportsVectorizer
+from .SignatureVectorizer import SignatureVectorizer
+from ..logger import get_logger
+
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.preprocessing import Normalizer
 from sklearn.decomposition import TruncatedSVD
 
-from rogers.vectorizer.PEVectorizer import HeaderVectorizer, SymImportsVectorizer, SymExportsVectorizer
-from rogers.vectorizer.SignatureVectorizer import SignatureVectorizer
-
-from rogers.logger import get_logger
 
 log = get_logger(__name__)
 

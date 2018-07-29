@@ -1,6 +1,5 @@
 """ Wrappers for generated PB
 """
-
 from .features_pb2 import Feature, Features, Value, List, Struct
 
 

@@ -35,5 +35,5 @@ setup(
     entry_points={
         'console_scripts': ['rogers=rogers.__main__:main'],
     },
-    license="",
+    license="Apache License Version 2.0",
 )

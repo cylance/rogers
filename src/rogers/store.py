@@ -1,11 +1,12 @@
 """ Local sqlite db
 """
+from .logger import get_logger
+from . import config as c
+
 import os
 import sqlite3
 from contextlib import contextmanager
-import rogers.sample.pe as pe
-from rogers.logger import get_logger
-import rogers.config as c
+
 
 log = get_logger(__name__)
 
@@ -70,8 +71,9 @@ class Database(object):
         with self.cursor() as cursor:
             cursor.execute("INSERT INTO sample (sha256) VALUES ('%s');" % hashval)
 
-    def get_samples(self):
+    def get_samples(self, sample_class):
         """ Iterate over all samples in DB
+        :param sample_class:
         :return:
         """
         with self.cursor() as cursor:
@@ -81,7 +83,7 @@ class Database(object):
                 if not batch:
                     break
                 for feature_blob in batch:
-                    yield pe.PE(None, features=pe.PE.deserialize(feature_blob[0]))
+                    yield sample_class(None, features=sample_class.deserialize(feature_blob[0]))
 
     def get_sample_feature_blob(self, hashval):
         """ Get feature bytes for sample by hashval
@@ -94,26 +96,28 @@ class Database(object):
             if ret is not None:
                 return ret[0]
 
-    def load_samples(self, hashvals):
+    def load_samples(self, hashvals, sample_class):
         """ Load samples for hashvals
         :param hashvals:
+        :param sample_class:
         :return: list of Sample
         """
         samples = []
         for h in hashvals:
-            sample = self.load_sample(h)
+            sample = self.load_sample(h, sample_class)
             if sample is not None:
                 samples.append(sample)
         return samples
 
-    def load_sample(self, hashval):
+    def load_sample(self, hashval, sample_class):
         """ Load sample by hashval into PE
         :param hashval:
+        :param sample_class:
         :return:
         """
         if self.sample_features_exists(hashval):
-            features = pe.PE.deserialize(self.get_sample_feature_blob(hashval))
-            return pe.PE(None, features=features)
+            features = sample_class.deserialize(self.get_sample_feature_blob(hashval))
+            return sample_class(None, features=features)
 
     def sample_features_exists(self, hashval):
         """ Check if sample features exist in database
@@ -164,4 +168,3 @@ class Database(object):
         finally:
             self._db.commit()
             cur.close()
-

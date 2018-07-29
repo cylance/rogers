@@ -1,8 +1,6 @@
 """ Static PE vectorizer
 """
-
 from sklearn.base import BaseEstimator, TransformerMixin
-
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction import DictVectorizer
 

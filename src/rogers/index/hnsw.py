@@ -3,12 +3,13 @@
 Based on http://arxiv.org/abs/1603.09320
 
 """
+from . import Index as BaseIndex
+from ..logger import get_logger
+from .. import config as c
+
 import nmslib
 from sklearn.externals import joblib
 
-from . import Index as BaseIndex
-from rogers.logger import get_logger
-import rogers.config as c
 
 log = get_logger(__name__)
 

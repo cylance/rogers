@@ -17,16 +17,16 @@ _sym_db = _symbol_database.Default()
 
 DESCRIPTOR = _descriptor.FileDescriptor(
   name='features.proto',
-  package='rogers.sample',
+  package='rogers.generated.features',
   syntax='proto3',
-  serialized_pb=_b('\n\x0e\x66\x65\x61tures.proto\x12\rrogers.sample\"\xae\x02\n\x07\x46\x65\x61ture\x12\x32\n\x04type\x18\x01 \x01(\x0e\x32$.rogers.sample.Feature.Variable.Type\x12\x32\n\x04mode\x18\x02 \x01(\x0e\x32$.rogers.sample.Feature.Modality.Type\x12#\n\x05value\x18\x03 \x01(\x0b\x32\x14.rogers.sample.Value\x1aN\n\x08Variable\"B\n\x04Type\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x00\x12\x0e\n\nCONTINUOUS\x10\x01\x12\x0c\n\x08\x44ISCRETE\x10\x02\x12\x0b\n\x07ORDINAL\x10\x03\x1a\x46\n\x08Modality\":\n\x04Type\x12\t\n\x05\x42YTES\x10\x00\x12\n\n\x06STATIC\x10\x01\x12\x0b\n\x07\x44YNAMIC\x10\x02\x12\x0e\n\nCONTEXTUAL\x10\x03\"\x8d\x01\n\x08\x46\x65\x61tures\x12\x0e\n\x06sha256\x18\x01 \x01(\t\x12-\n\x03map\x18\x02 \x03(\x0b\x32 .rogers.sample.Features.MapEntry\x1a\x42\n\x08MapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12%\n\x05value\x18\x02 \x01(\x0b\x32\x16.rogers.sample.Feature:\x02\x38\x01\"}\n\x06Struct\x12/\n\x05value\x18\x01 \x03(\x0b\x32 .rogers.sample.Struct.ValueEntry\x1a\x42\n\nValueEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12#\n\x05value\x18\x02 \x01(\x0b\x32\x14.rogers.sample.Value:\x02\x38\x01\"+\n\x04List\x12#\n\x05value\x18\x01 \x03(\x0b\x32\x14.rogers.sample.Value\"\xcb\x01\n\x05Value\x12\x16\n\x0cstring_value\x18\x01 \x01(\tH\x00\x12\x14\n\nbool_value\x18\x02 \x01(\x08H\x00\x12\x13\n\tint_value\x18\x03 \x01(\x04H\x00\x12\x16\n\x0c\x64ouble_value\x18\x04 \x01(\x01H\x00\x12-\n\x0cstruct_value\x18\x05 \x01(\x0b\x32\x15.rogers.sample.StructH\x00\x12)\n\nlist_value\x18\x06 \x01(\x0b\x32\x13.rogers.sample.ListH\x00\x42\r\n\x0bvalue_oneofB\x02H\x01\x62\x06proto3')
+  serialized_pb=_b('\n\x0e\x66\x65\x61tures.proto\x12\x19rogers.generated.features\"\xd2\x02\n\x07\x46\x65\x61ture\x12>\n\x04type\x18\x01 \x01(\x0e\x32\x30.rogers.generated.features.Feature.Variable.Type\x12>\n\x04mode\x18\x02 \x01(\x0e\x32\x30.rogers.generated.features.Feature.Modality.Type\x12/\n\x05value\x18\x03 \x01(\x0b\x32 .rogers.generated.features.Value\x1aN\n\x08Variable\"B\n\x04Type\x12\x0f\n\x0b\x43\x41TEGORICAL\x10\x00\x12\x0e\n\nCONTINUOUS\x10\x01\x12\x0c\n\x08\x44ISCRETE\x10\x02\x12\x0b\n\x07ORDINAL\x10\x03\x1a\x46\n\x08Modality\":\n\x04Type\x12\t\n\x05\x42YTES\x10\x00\x12\n\n\x06STATIC\x10\x01\x12\x0b\n\x07\x44YNAMIC\x10\x02\x12\x0e\n\nCONTEXTUAL\x10\x03\"\xa5\x01\n\x08\x46\x65\x61tures\x12\x0e\n\x06sha256\x18\x01 \x01(\t\x12\x39\n\x03map\x18\x02 \x03(\x0b\x32,.rogers.generated.features.Features.MapEntry\x1aN\n\x08MapEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12\x31\n\x05value\x18\x02 \x01(\x0b\x32\".rogers.generated.features.Feature:\x02\x38\x01\"\x95\x01\n\x06Struct\x12;\n\x05value\x18\x01 \x03(\x0b\x32,.rogers.generated.features.Struct.ValueEntry\x1aN\n\nValueEntry\x12\x0b\n\x03key\x18\x01 \x01(\t\x12/\n\x05value\x18\x02 \x01(\x0b\x32 .rogers.generated.features.Value:\x02\x38\x01\"7\n\x04List\x12/\n\x05value\x18\x01 \x03(\x0b\x32 .rogers.generated.features.Value\"\xe3\x01\n\x05Value\x12\x16\n\x0cstring_value\x18\x01 \x01(\tH\x00\x12\x14\n\nbool_value\x18\x02 \x01(\x08H\x00\x12\x13\n\tint_value\x18\x03 \x01(\x04H\x00\x12\x16\n\x0c\x64ouble_value\x18\x04 \x01(\x01H\x00\x12\x39\n\x0cstruct_value\x18\x05 \x01(\x0b\x32!.rogers.generated.features.StructH\x00\x12\x35\n\nlist_value\x18\x06 \x01(\x0b\x32\x1f.rogers.generated.features.ListH\x00\x42\r\n\x0bvalue_oneofB\x02H\x01\x62\x06proto3')
 )
 
 
 
 _FEATURE_VARIABLE_TYPE = _descriptor.EnumDescriptor(
   name='Type',
-  full_name='rogers.sample.Feature.Variable.Type',
+  full_name='rogers.generated.features.Feature.Variable.Type',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -49,14 +49,14 @@ _FEATURE_VARIABLE_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=198,
-  serialized_end=264,
+  serialized_start=246,
+  serialized_end=312,
 )
 _sym_db.RegisterEnumDescriptor(_FEATURE_VARIABLE_TYPE)
 
 _FEATURE_MODALITY_TYPE = _descriptor.EnumDescriptor(
   name='Type',
-  full_name='rogers.sample.Feature.Modality.Type',
+  full_name='rogers.generated.features.Feature.Modality.Type',
   filename=None,
   file=DESCRIPTOR,
   values=[
@@ -79,15 +79,15 @@ _FEATURE_MODALITY_TYPE = _descriptor.EnumDescriptor(
   ],
   containing_type=None,
   options=None,
-  serialized_start=278,
-  serialized_end=336,
+  serialized_start=326,
+  serialized_end=384,
 )
 _sym_db.RegisterEnumDescriptor(_FEATURE_MODALITY_TYPE)
 
 
 _FEATURE_VARIABLE = _descriptor.Descriptor(
   name='Variable',
-  full_name='rogers.sample.Feature.Variable',
+  full_name='rogers.generated.features.Feature.Variable',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -105,13 +105,13 @@ _FEATURE_VARIABLE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=186,
-  serialized_end=264,
+  serialized_start=234,
+  serialized_end=312,
 )
 
 _FEATURE_MODALITY = _descriptor.Descriptor(
   name='Modality',
-  full_name='rogers.sample.Feature.Modality',
+  full_name='rogers.generated.features.Feature.Modality',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
@@ -129,33 +129,33 @@ _FEATURE_MODALITY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=266,
-  serialized_end=336,
+  serialized_start=314,
+  serialized_end=384,
 )
 
 _FEATURE = _descriptor.Descriptor(
   name='Feature',
-  full_name='rogers.sample.Feature',
+  full_name='rogers.generated.features.Feature',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='type', full_name='rogers.sample.Feature.type', index=0,
+      name='type', full_name='rogers.generated.features.Feature.type', index=0,
       number=1, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='mode', full_name='rogers.sample.Feature.mode', index=1,
+      name='mode', full_name='rogers.generated.features.Feature.mode', index=1,
       number=2, type=14, cpp_type=8, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='value', full_name='rogers.sample.Feature.value', index=2,
+      name='value', full_name='rogers.generated.features.Feature.value', index=2,
       number=3, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -173,27 +173,27 @@ _FEATURE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=34,
-  serialized_end=336,
+  serialized_start=46,
+  serialized_end=384,
 )
 
 
 _FEATURES_MAPENTRY = _descriptor.Descriptor(
   name='MapEntry',
-  full_name='rogers.sample.Features.MapEntry',
+  full_name='rogers.generated.features.Features.MapEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='key', full_name='rogers.sample.Features.MapEntry.key', index=0,
+      name='key', full_name='rogers.generated.features.Features.MapEntry.key', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='value', full_name='rogers.sample.Features.MapEntry.value', index=1,
+      name='value', full_name='rogers.generated.features.Features.MapEntry.value', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -211,26 +211,26 @@ _FEATURES_MAPENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=414,
-  serialized_end=480,
+  serialized_start=474,
+  serialized_end=552,
 )
 
 _FEATURES = _descriptor.Descriptor(
   name='Features',
-  full_name='rogers.sample.Features',
+  full_name='rogers.generated.features.Features',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='sha256', full_name='rogers.sample.Features.sha256', index=0,
+      name='sha256', full_name='rogers.generated.features.Features.sha256', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='map', full_name='rogers.sample.Features.map', index=1,
+      name='map', full_name='rogers.generated.features.Features.map', index=1,
       number=2, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -248,27 +248,27 @@ _FEATURES = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=339,
-  serialized_end=480,
+  serialized_start=387,
+  serialized_end=552,
 )
 
 
 _STRUCT_VALUEENTRY = _descriptor.Descriptor(
   name='ValueEntry',
-  full_name='rogers.sample.Struct.ValueEntry',
+  full_name='rogers.generated.features.Struct.ValueEntry',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='key', full_name='rogers.sample.Struct.ValueEntry.key', index=0,
+      name='key', full_name='rogers.generated.features.Struct.ValueEntry.key', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='value', full_name='rogers.sample.Struct.ValueEntry.value', index=1,
+      name='value', full_name='rogers.generated.features.Struct.ValueEntry.value', index=1,
       number=2, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -286,19 +286,19 @@ _STRUCT_VALUEENTRY = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=541,
-  serialized_end=607,
+  serialized_start=626,
+  serialized_end=704,
 )
 
 _STRUCT = _descriptor.Descriptor(
   name='Struct',
-  full_name='rogers.sample.Struct',
+  full_name='rogers.generated.features.Struct',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='value', full_name='rogers.sample.Struct.value', index=0,
+      name='value', full_name='rogers.generated.features.Struct.value', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -316,20 +316,20 @@ _STRUCT = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=482,
-  serialized_end=607,
+  serialized_start=555,
+  serialized_end=704,
 )
 
 
 _LIST = _descriptor.Descriptor(
   name='List',
-  full_name='rogers.sample.List',
+  full_name='rogers.generated.features.List',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='value', full_name='rogers.sample.List.value', index=0,
+      name='value', full_name='rogers.generated.features.List.value', index=0,
       number=1, type=11, cpp_type=10, label=3,
       has_default_value=False, default_value=[],
       message_type=None, enum_type=None, containing_type=None,
@@ -347,55 +347,55 @@ _LIST = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
   ],
-  serialized_start=609,
-  serialized_end=652,
+  serialized_start=706,
+  serialized_end=761,
 )
 
 
 _VALUE = _descriptor.Descriptor(
   name='Value',
-  full_name='rogers.sample.Value',
+  full_name='rogers.generated.features.Value',
   filename=None,
   file=DESCRIPTOR,
   containing_type=None,
   fields=[
     _descriptor.FieldDescriptor(
-      name='string_value', full_name='rogers.sample.Value.string_value', index=0,
+      name='string_value', full_name='rogers.generated.features.Value.string_value', index=0,
       number=1, type=9, cpp_type=9, label=1,
       has_default_value=False, default_value=_b("").decode('utf-8'),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='bool_value', full_name='rogers.sample.Value.bool_value', index=1,
+      name='bool_value', full_name='rogers.generated.features.Value.bool_value', index=1,
       number=2, type=8, cpp_type=7, label=1,
       has_default_value=False, default_value=False,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='int_value', full_name='rogers.sample.Value.int_value', index=2,
+      name='int_value', full_name='rogers.generated.features.Value.int_value', index=2,
       number=3, type=4, cpp_type=4, label=1,
       has_default_value=False, default_value=0,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='double_value', full_name='rogers.sample.Value.double_value', index=3,
+      name='double_value', full_name='rogers.generated.features.Value.double_value', index=3,
       number=4, type=1, cpp_type=5, label=1,
       has_default_value=False, default_value=float(0),
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='struct_value', full_name='rogers.sample.Value.struct_value', index=4,
+      name='struct_value', full_name='rogers.generated.features.Value.struct_value', index=4,
       number=5, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
       is_extension=False, extension_scope=None,
       options=None, file=DESCRIPTOR),
     _descriptor.FieldDescriptor(
-      name='list_value', full_name='rogers.sample.Value.list_value', index=5,
+      name='list_value', full_name='rogers.generated.features.Value.list_value', index=5,
       number=6, type=11, cpp_type=10, label=1,
       has_default_value=False, default_value=None,
       message_type=None, enum_type=None, containing_type=None,
@@ -413,11 +413,11 @@ _VALUE = _descriptor.Descriptor(
   extension_ranges=[],
   oneofs=[
     _descriptor.OneofDescriptor(
-      name='value_oneof', full_name='rogers.sample.Value.value_oneof',
+      name='value_oneof', full_name='rogers.generated.features.Value.value_oneof',
       index=0, containing_type=None, fields=[]),
   ],
-  serialized_start=655,
-  serialized_end=858,
+  serialized_start=764,
+  serialized_end=991,
 )
 
 _FEATURE_VARIABLE.containing_type = _FEATURE
@@ -466,19 +466,19 @@ Feature = _reflection.GeneratedProtocolMessageType('Feature', (_message.Message,
   Variable = _reflection.GeneratedProtocolMessageType('Variable', (_message.Message,), dict(
     DESCRIPTOR = _FEATURE_VARIABLE,
     __module__ = 'features_pb2'
-    # @@protoc_insertion_point(class_scope:rogers.sample.Feature.Variable)
+    # @@protoc_insertion_point(class_scope:rogers.generated.features.Feature.Variable)
     ))
   ,
 
   Modality = _reflection.GeneratedProtocolMessageType('Modality', (_message.Message,), dict(
     DESCRIPTOR = _FEATURE_MODALITY,
     __module__ = 'features_pb2'
-    # @@protoc_insertion_point(class_scope:rogers.sample.Feature.Modality)
+    # @@protoc_insertion_point(class_scope:rogers.generated.features.Feature.Modality)
     ))
   ,
   DESCRIPTOR = _FEATURE,
   __module__ = 'features_pb2'
-  # @@protoc_insertion_point(class_scope:rogers.sample.Feature)
+  # @@protoc_insertion_point(class_scope:rogers.generated.features.Feature)
   ))
 _sym_db.RegisterMessage(Feature)
 _sym_db.RegisterMessage(Feature.Variable)
@@ -489,12 +489,12 @@ Features = _reflection.GeneratedProtocolMessageType('Features', (_message.Messag
   MapEntry = _reflection.GeneratedProtocolMessageType('MapEntry', (_message.Message,), dict(
     DESCRIPTOR = _FEATURES_MAPENTRY,
     __module__ = 'features_pb2'
-    # @@protoc_insertion_point(class_scope:rogers.sample.Features.MapEntry)
+    # @@protoc_insertion_point(class_scope:rogers.generated.features.Features.MapEntry)
     ))
   ,
   DESCRIPTOR = _FEATURES,
   __module__ = 'features_pb2'
-  # @@protoc_insertion_point(class_scope:rogers.sample.Features)
+  # @@protoc_insertion_point(class_scope:rogers.generated.features.Features)
   ))
 _sym_db.RegisterMessage(Features)
 _sym_db.RegisterMessage(Features.MapEntry)
@@ -504,12 +504,12 @@ Struct = _reflection.GeneratedProtocolMessageType('Struct', (_message.Message,),
   ValueEntry = _reflection.GeneratedProtocolMessageType('ValueEntry', (_message.Message,), dict(
     DESCRIPTOR = _STRUCT_VALUEENTRY,
     __module__ = 'features_pb2'
-    # @@protoc_insertion_point(class_scope:rogers.sample.Struct.ValueEntry)
+    # @@protoc_insertion_point(class_scope:rogers.generated.features.Struct.ValueEntry)
     ))
   ,
   DESCRIPTOR = _STRUCT,
   __module__ = 'features_pb2'
-  # @@protoc_insertion_point(class_scope:rogers.sample.Struct)
+  # @@protoc_insertion_point(class_scope:rogers.generated.features.Struct)
   ))
 _sym_db.RegisterMessage(Struct)
 _sym_db.RegisterMessage(Struct.ValueEntry)
@@ -517,14 +517,14 @@ _sym_db.RegisterMessage(Struct.ValueEntry)
 List = _reflection.GeneratedProtocolMessageType('List', (_message.Message,), dict(
   DESCRIPTOR = _LIST,
   __module__ = 'features_pb2'
-  # @@protoc_insertion_point(class_scope:rogers.sample.List)
+  # @@protoc_insertion_point(class_scope:rogers.generated.features.List)
   ))
 _sym_db.RegisterMessage(List)
 
 Value = _reflection.GeneratedProtocolMessageType('Value', (_message.Message,), dict(
   DESCRIPTOR = _VALUE,
   __module__ = 'features_pb2'
-  # @@protoc_insertion_point(class_scope:rogers.sample.Value)
+  # @@protoc_insertion_point(class_scope:rogers.generated.features.Value)
   ))
 _sym_db.RegisterMessage(Value)
 
