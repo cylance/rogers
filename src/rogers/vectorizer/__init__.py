@@ -16,7 +16,7 @@ def pe_pipeline():
     """ Offline static pe pipeline that generates dense vectors, uses ideas from Latent Semantic Index
     by representing sample features as a document with a vocabulary of terms
 
-    TODO: This can totally be improved with parameter optimization and/or better feature representationswith a vocabulary of terms
+    TODO: This can totally be improved with parameter optimization and/or better feature representations
 
     :return:
     """
