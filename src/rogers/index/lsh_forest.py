@@ -15,15 +15,14 @@ class Index(BaseIndex):
 
     name = 'lsh_forest'
 
-    def fit(self, samples, **kwargs):
+    def fit(self, samples):
         """ Fit index
         :param samples: list of Samples
-        :param kwargs: optional index parameters
         :return:
         """
         xs, self.ys = self.transform(samples)
         log.info("Transformed samples to (%s, %s)" % xs.shape)
-        self.index = LSHForest(n_estimators=kwargs.get('n_estimators', 20))
+        self.index = LSHForest(n_estimators=self.parameters.get('n_estimators', 20))
         self.index.fit(xs)
 
     def _query(self, sample,  k=5, **kwargs):

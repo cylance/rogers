@@ -1,6 +1,6 @@
 """ Wrappers for generated PB
 """
-from .features_pb2 import Feature, Features, Value, List, Struct
+from .feature_pb2 import Feature, Features, Value, List, Struct
 
 
 def feature(val, var_type=Feature.Variable.CATEGORICAL, var_mode=Feature.Modality.STATIC):

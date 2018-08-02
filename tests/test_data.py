@@ -6,7 +6,7 @@ import rogers.generated as d
 
 
 def test_init():
-    import rogers.generated.features_pb2
+    import rogers.generated.feature_pb2
 
 
 def test_feature():

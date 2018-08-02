@@ -1,5 +1,5 @@
 syntax = "proto3";
-package rogers.generated.features;
+package rogers.generated.feature;
 
 option optimize_for = SPEED;
 
@@ -30,7 +30,8 @@ message Feature {
 
 message Features {
     string sha256                   = 1;
-    map<string, Feature> map        = 2;
+    string namespace                = 2;
+    map<string, Feature> map        = 3;
 }
 
 message Struct {

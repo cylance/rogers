@@ -6,13 +6,14 @@ from multiprocessing import Pool
 
 import pandas as pd
 from google.protobuf import json_format
+from shutil import copyfile
 
+from . import store
 from . import config as c
 from . import generated as d
-from . import index
 from . import util
 from . import vectorizer
-from .resource import DB
+from .index import index, Index
 from .sample import pe
 from .logger import get_logger
 
@@ -21,30 +22,40 @@ log = get_logger(__name__)
 POOL = Pool()
 
 
-def extract(dir_path, filter_hashvals=None, force=False, sample_class=pe.PE):
+def extract(dir_path=None, filter_hashvals=None, force=False, sample_class=pe.PE, db=None):
     """ Extract command
     :param dir_path:
     :param filter_hashvals:
     :param force:
     :param sample_class:
+    :param db:
     :return:
     """
-    dir_path = dir_path or c.settings.get('SAMPLE_DIR')
-
+    db = db or store.Database()
+    sample_dir_path = c.settings.get('SAMPLE_DIR')
     n_samples = 0
-    for _ in util.enumerate_dir(dir_path):
-        n_samples += 1
+    if dir_path is not None:
+        for _ in util.enumerate_dir(dir_path):
+            n_samples += 1
+        sample_paths = util.enumerate_dir(dir_path)
+        log.info("Preprocessing %s samples", n_samples)
+        sample_hashval_and_filepath = {}
+        for ret in POOL.imap(sample_class.preprocessor, sample_paths):
+            try:
+                sample_hashval_and_filepath[ret[1]] = ret[0]
+            except Exception as e:
+                log.exception(e)
+        log.info("Identified %s unique samples to copy into sample dir", len(sample_hashval_and_filepath))
+        for hashval, sample_path in sample_hashval_and_filepath.items():
+            new_sample_path = os.path.join(sample_dir_path, util.sha256_key(hashval))
+            try:
+                copyfile(sample_path, new_sample_path)
+            except Exception as e:
+                log.error("%s: %s - %s", hashval, sample_path, e)
 
-    sample_paths = util.enumerate_dir(dir_path)
-
-    log.info("Preprocessing %s samples", n_samples)
     sample_hashval_and_filepath = {}
-    for ret in POOL.imap(sample_class.preprocessor, sample_paths):
-        try:
-            sample_hashval_and_filepath[ret[1]] = ret[0]
-        except Exception as e:
-            log.exception(e)
-    log.info("Identified %s unique samples", len(sample_hashval_and_filepath))
+    for path in util.enumerate_dir(sample_dir_path):
+        sample_hashval_and_filepath[os.path.basename(path)] = path
 
     if not force or filter_hashvals is not None:
         if filter_hashvals is not None:
@@ -52,38 +63,37 @@ def extract(dir_path, filter_hashvals=None, force=False, sample_class=pe.PE):
                             hashval in filter_hashvals]
         else:
             sample_paths = [sample_path for hashval, sample_path in sample_hashval_and_filepath.items() if
-                            not DB.sample_features_exists(hashval)]
+                            not db.sample_features_exists(hashval)]
     else:
         sample_paths = sample_hashval_and_filepath.values()
-    n_samples = len(sample_paths)
 
+    n_samples = len(sample_paths)
     log.info("Extracting features for %s samples", n_samples)
     for ret in POOL.imap(sample_class.process, sample_paths):
         if ret is not None:
             hashval, msg = ret
             log.debug(hashval)
-            DB.insert_sample_features(hashval, msg)
+            db.insert_sample_features(hashval, msg)
     log.info("Feature extraction complete")
 
 
-def transform(samples):
-    """ Transform command
+def pipeline_fit(samples):
+    """ Fit pipeline
     :param samples:
     :return:
     """
     pipeline = vectorizer.pe_pipeline()
-    index.Index.fit_transform(pipeline, samples)
+    Index.fit_pipeline(pipeline, samples)
 
 
-def fit(index_name, samples, sample_class=pe.PE):
+def fit(index_name, samples):
     """ Fit command
     :param index_name:
     :param samples:
-    :param sample_class:
     :return:
     """
     log.info("Fitting index")
-    idx = index.init(index_name, sample_class)
+    idx = index(index_name)
     idx.fit(samples)
     log.info("Saving index")
     idx.save()
@@ -102,17 +112,16 @@ def fit(index_name, samples, sample_class=pe.PE):
 #     idx.save()
 
 
-def query(index_name, samples, k=5, sample_class=pe.PE, console_print=False, export=None):
+def query(index_name, samples, k=5, console_print=False, export=None):
     """ Query command
     :param index_name:
     :param samples:
     :param k:
-    :param sample_class:
     :param console_print:
     :param export:
     :return:
     """
-    idx = index.init(index_name, sample_class)
+    idx = index(index_name)
     idx.load()
     if len(samples):
         neighbors = []
@@ -140,19 +149,20 @@ def query(index_name, samples, k=5, sample_class=pe.PE, console_print=False, exp
         raise Exception("Need to process hash")
 
 
-def feature_add(input_file, var_type, var_modality, sample_class=pe.PE):
+def feature_add(input_file, var_type, var_modality, db=None):
     """ Add features for samples into database from input CSV
     :param input_file:
     :param var_type:
     :param var_modality:
-    :param sample_class:
+    :param db:
     :return:
     """
+    db = db or store.Database()
     df = pd.read_csv(input_file)
     var_type = d.Feature.Variable.Type.Value(var_type)
     var_mode = d.Feature.Modality.Type.Value(var_modality)
     for _, r in df.dropna().iterrows():
-        s = DB.load_sample(r['sha256'], sample_class)
+        s = db.load_sample(r['sha256'])
         if s is None:
             log.warning("%s: Not in sample db", r['sha256'])
             continue
@@ -160,10 +170,10 @@ def feature_add(input_file, var_type, var_modality, sample_class=pe.PE):
             if k != 'sha256':
                 s.add(k, r[k], var_type=var_type, var_mode=var_mode)
                 log.debug("%s: Added feature %s - %s", r['sha256'], k, r[k])
-        DB.insert_sample_features(s.sha256, s.serialize())
+        db.insert_sample_features(s.sha256, s.serialize())
 
 
-def features_get(hashval, console_print=False, export=None, sample_class=pe.PE):
+def features_get(hashval, console_print=False, export=None, db=None):
     """ Query sample
     :param hashval:
     :param console_print:
@@ -171,7 +181,8 @@ def features_get(hashval, console_print=False, export=None, sample_class=pe.PE):
     :param sample_class:
     :return:
     """
-    sample = DB.load_sample(hashval, sample_class)
+    db = db or store.Database()
+    sample = db.load_sample(hashval)
     if sample is not None:
         util.print_sample_details(sample, console_print)
         if export is not None:
@@ -185,18 +196,18 @@ def db_info():
     """ Count samples in database
     :return:
     """
-    log.info("database contains %s samples", DB.n)
+    log.info("database contains %s samples", store.Database().n)
 
 
 def db_initialize():
     """ Initialize database
     :return:
     """
-    DB.initialize()
+    store.Database().initialize()
 
 
 def db_reset():
     """ Reset database
     :return:
     """
-    DB.reset()
+    store.Database().reset()

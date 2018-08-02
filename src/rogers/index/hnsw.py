@@ -20,18 +20,17 @@ class Index(BaseIndex):
 
     name = 'hnsw'
 
-    def fit(self, samples, **kwargs):
+    def fit(self, samples):
         """ Fit HNSW index
         :param samples: list of Samples
-        :param kwargs: optional index parameters
         :return:
         """
         xs, self.ys = self.transform(samples)
         self.index = nmslib.init(method='hnsw', space='cosinesimil')
         self.index.addDataPointBatch(xs)
-        self.index.createIndex({'post': kwargs.get('post', 0),
-                                'efConstruction': kwargs.get('efConstruction', 400),
-                                'M': kwargs.get('M', 12)})
+        self.index.createIndex({'post': self.parameters.get('post', 0),
+                                'efConstruction': self.parameters.get('efConstruction', 400),
+                                'M': self.parameters.get('M', 12)})
 
     def _query(self, sample, k=1, **kwargs):
         """ Query samples

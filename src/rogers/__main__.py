@@ -1,8 +1,8 @@
 """ Entry points for Rogers malware similarity tool
 """
 from . import config
-from .resource import DB
-from .index import list_available_index
+from . import store
+from .index import Index
 from .generated import Feature
 from .sample import pe
 from . import logger as l
@@ -15,25 +15,25 @@ import pandas as pd
 log = l.get_logger('rogers')
 
 
-INDEX_OPTIONS = list_available_index()
+INDEX_OPTIONS = Index.list_available_index()
 
 
-def _samples_from_args(args, sample_class):
+def _samples_from_args(args):
     """ Get sample or samples from args
     :param args:
-    :param sample_class:
     :return: list of Samples
     """
+    db = store.Database()
     if args.input:
         hashvals = set(pd.read_csv(args.input)['sha256'].tolist())
         log.info("Loading samples for %s input hashes for index command", len(hashvals))
-        return [s for s in map(lambda x: DB.load_sample(x, sample_class), hashvals) if s is not None]
+        return [s for s in map(lambda x: db.load_sample(x), hashvals) if s is not None]
     elif hasattr(args, 'hashval') and args.hashval:
         log.info("Loading %s hashvals" % len(args.hashval))
-        return [s for s in map(lambda x: DB.load_sample(x, sample_class), args.hashval) if s is not None]
+        return [s for s in map(lambda x: db.load_sample(x), args.hashval) if s is not None]
     else:
-        log.info("Loading %s samples from db", DB.n)
-        return [s for s in DB.get_samples(sample_class)]
+        log.info("Loading %s samples from db", db.n)
+        return [s for s in db.get_samples()]
 
 
 def features_get(args):
@@ -66,17 +66,17 @@ def extract(args):
 
 
 def transform(args):
-    samples = _samples_from_args(args, pe.PE)
-    api.transform(samples)
+    samples = _samples_from_args(args)
+    api.transform(args.index, samples)
 
 
 def fit(args):
-    samples = _samples_from_args(args, pe.PE)
+    samples = _samples_from_args(args)
     api.fit(args.index, samples)
 
 
 def query(args):
-    samples = _samples_from_args(args, pe.PE)
+    samples = _samples_from_args(args)
     api.query(args.index, samples, k=args.k, export=args.export, console_print=args.print)
 
 
@@ -134,6 +134,7 @@ def main():
 
     # transform
     transform_parser = index_subparsers.add_parser('transform')
+    transform_parser.add_argument('index', choices=INDEX_OPTIONS, type=str, help='Name of index type')
     transform_parser.set_defaults(func=transform)
 
     # fit

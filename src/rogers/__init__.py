@@ -1,5 +1,6 @@
 """ Rogers malware similarity module
 """
+from . import api
 from . import index
 from . import sample
 from . import vectorizer
@@ -11,4 +12,4 @@ import uvloop
 asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
 
 
-__all__ = ['index', 'vectorizer', 'sample', 'visualize', 'store']
+__all__ = ['index', 'vectorizer', 'sample', 'visualize', 'store', 'api']

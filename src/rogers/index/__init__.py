@@ -13,21 +13,8 @@ from operator import itemgetter
 
 log = get_logger(__name__)
 
-DB = store.Database()
 
-
-def list_available_index():
-    """ Dynamically identify available index modules in index/
-    :return: name of module file without ext
-    """
-    l = []
-    for name in os.listdir(os.path.join(c.MODULE_DIR, "index")):
-        if name.endswith(".py") and name != '__init__.py':
-            l.append(name.replace('.py', ''))
-    return l
-
-
-def init(name, sample_class):
+def index(name, *args, **kwargs):
     """ Dynamically load a model class and instantiate
     :param name:
     :param sample_class:
@@ -36,7 +23,7 @@ def init(name, sample_class):
     try:
         index_mod_name = "rogers.index.%s" % name
         mod = import_module("rogers.index.%s" % name)
-        idx = mod.Index(sample_class)
+        idx = mod.Index(*args, **kwargs)
     except ModuleNotFoundError:
         log.fatal("%s index is not available", name)
         raise SystemExit(-1)
@@ -51,13 +38,13 @@ class Index(object):
 
     name = 'base'
 
-    def __init__(self, sample_class):
+    def __init__(self, db=None, **parameters):
         """ Base attributes
         """
-        self.model = None
+        self.db = db or store.Database()
         self.index = None
         self.ys = None
-        self.sample_class = sample_class
+        self.parameters = parameters
         try:
             self.pipeline = joblib.load(c.index_path('pipeline.pkl'))
         except FileNotFoundError:
@@ -71,6 +58,17 @@ class Index(object):
         """
         return c.index_path(self.name)
 
+    @staticmethod
+    def list_available_index():
+        """ Dynamically identify available index modules in index/
+        :return: name of module file without ext
+        """
+        l = []
+        for name in os.listdir(os.path.join(c.MODULE_DIR, "index")):
+            if name.endswith(".py") and name != '__init__.py':
+                l.append(name.replace('.py', ''))
+        return l
+
     def transform(self, samples):
         """ Transform samples to xs, ys
         :param samples:
@@ -81,7 +79,7 @@ class Index(object):
         return xs, ys
 
     @staticmethod
-    def fit_transform(pipeline, samples):
+    def fit_pipeline(pipeline, samples):
         """ Fit the vectorizer
         :return:
         """
@@ -109,10 +107,9 @@ class Index(object):
         joblib.dump(self.index, "%s.index" % self.index_file_prefix)
         joblib.dump(self.ys, "%s.ys" % self.index_file_prefix)
 
-    def fit(self, samples, **kwargs):
+    def fit(self, samples):
         """ Fit samples into index
-        :param samples: List of Sample
-        :param kwargs: additional kwargs to pass to index fit
+        :param samples: List of Sample instances
         :return:
         """
         raise NotImplementedError
@@ -143,7 +140,7 @@ class Index(object):
         :return:
         """
         for nbr in neighbors:
-            sample = DB.load_sample(nbr['hashval'], self.sample_class)
+            sample = self.db.load_sample(nbr['hashval'])
             result['neighbors'].append((sample, nbr['similarity']))
         return result
 
@@ -193,7 +190,7 @@ class Index(object):
                 if nbr['hashval'] not in query_hashvals:
                     neighbor_hashvals.add(nbr['hashval'])
 
-        neighbor_samples = DB.load_samples(list(neighbor_hashvals), self.sample_class)
+        neighbor_samples = self.db.load_samples(list(neighbor_hashvals))
 
         if include_neighbors:
             nbr_multiple_results = list(map(lambda s: {'query': s,
@@ -207,7 +204,7 @@ class Index(object):
                     if nbr['hashval'] not in query_hashvals and nbr['hashval'] not in neighbor_hashvals:
                         expanded_neighbor_hashvals.add(nbr['hashval'])
 
-            neighbor_samples += DB.load_samples(list(expanded_neighbor_hashvals),  self.sample_class)
+            neighbor_samples += self.db.load_samples(list(expanded_neighbor_hashvals))
 
             tmp_multiple_results += nbr_multiple_results
 

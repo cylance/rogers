@@ -3,6 +3,7 @@
 from .. import generated as d
 from ..logger import get_logger
 from ..config import YARA_RULE_PATH
+from ..util import load_class
 
 import yara
 import io
@@ -32,7 +33,7 @@ class Unsupported(Exception):
 
 class Sample(object):
 
-    def __init__(self, local_path, features=None):
+    def __init__(self, local_path=None, features=None):
         """ Setup sample class with path to sample and optional feature data
         :param local_path:
         :param features:
@@ -41,6 +42,7 @@ class Sample(object):
         self._sha256 = None
         if features is None:
             self.features = d.Features()
+            self.features.namespace = "%s.%s" % (self.__module__, self.__class__.__qualname__)
         else:
             self._sha256 = features.sha256
             self.features = features
@@ -86,7 +88,8 @@ class Sample(object):
         with gzip.GzipFile(fileobj=in_, mode='rb') as fo:
             features = d.Features()
             features.ParseFromString(fo.read())
-        return features
+        sample_class = load_class(features.namespace)
+        return sample_class(features=features)
 
     def serialize(self):
         """ Serialize features message to bytes

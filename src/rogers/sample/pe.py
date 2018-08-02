@@ -19,12 +19,11 @@ class PE(Sample):
         :return:
         """
         sample = PE(sample_path)
-        ctph_idx = ctph.Index()
         try:
             # calculate static pe features
             sample.extract()
             # calculate ssdeep
-            ctph_idx.transform(sample)
+            ctph.Index.transform(sample)
         except Exception as e:
             log.exception("%s: %s", sample.local_path, e)
         else:

@@ -113,10 +113,9 @@ class Index(BaseIndex, Database):
         for s in xs:
             self.add(s)
 
-    def fit(self, samples, **kwargs):
+    def fit(self, samples):
         """ Fit the index
         :param samples:
-        :param kwargs:
         :return:
         """
         self.reset()

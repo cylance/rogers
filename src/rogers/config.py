@@ -38,7 +38,7 @@ def index_path(path):
     return os.path.join(settings.get('INDEX_DIR'), path)
 
 
-def configure(cfg_path):
+def configure(cfg_path=None):
     """ Load rogers conf file and set environment
     :param cfg_path:
     :return:
@@ -62,5 +62,3 @@ def configure(cfg_path):
 
     log.debug("Sample Directory: %s", sample_dir)
     log.debug("Index Directory: %s", index_dir)
-
-configure(DEFAULT_CONF_PATH)

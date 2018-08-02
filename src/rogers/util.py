@@ -1,14 +1,27 @@
 """ Utility functions and helpers
 """
+from .logger import get_logger
+from . import generated as d
+
+
 import os
+import importlib
 import os.path as path
 
 from terminaltables import SingleTable
 
-from .logger import get_logger
-from . import generated as d
 
 log = get_logger(__name__)
+
+
+def load_class(namespace):
+    """ Python package namespace with class, e.g. module.Class
+    :param namespace:
+    :return:
+    """
+    module_name, class_name = namespace.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+    return getattr(module, class_name)
 
 
 def print_sample_details(sample, use_print=False):
@@ -89,3 +102,18 @@ def chunks(l, n):
     """
     for i in range(0, len(l), n):
         yield l[i:i + n]
+
+
+def sha256_key(sha256):
+    """ Create key from sha256
+    :param sha256: hashval
+    :return: path to return
+    :rtype: str
+    """
+    try:
+        path = "%s%s/%s%s/%s%s/%s%s/%s" % (
+            sha256[0], sha256[1], sha256[2], sha256[3], sha256[4],
+            sha256[5], sha256[6], sha256[7], sha256)
+    except IndexError:
+        return sha256
+    return path
