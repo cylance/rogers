@@ -1,5 +1,6 @@
 """ Command line entry points
 """
+import numpy as np
 import json
 import os
 from multiprocessing import Pool
@@ -7,6 +8,7 @@ from multiprocessing import Pool
 import pandas as pd
 from google.protobuf import json_format
 from shutil import copyfile
+from sklearn.externals import joblib
 
 from . import store
 from . import config as c
@@ -82,8 +84,16 @@ def pipeline_fit(samples):
     :param samples:
     :return:
     """
-    pipeline = vectorizer.pe_pipeline()
-    Index.fit_pipeline(pipeline, samples)
+    pipeline = vectorizer.offline_pe_pipeline()
+    pipeline.fit(samples)
+    xs = pipeline.fit_transform(samples)
+    ys = np.array([s.sha256 for s in samples])
+    log.info("Fit and transformed samples to %s", xs.shape)
+
+    log.info("Exporting pipeline files")
+    joblib.dump(xs, c.index_path('xs.pkl'))
+    joblib.dump(ys, c.index_path('ys.pkl'))
+    joblib.dump(pipeline, c.index_path('pipeline.pkl'))
 
 
 def fit(index_name, samples):
@@ -149,27 +159,26 @@ def query(index_name, samples, k=5, console_print=False, export=None):
         raise Exception("Need to process hash")
 
 
-def feature_add(input_file, var_type, var_modality, db=None):
+def feature_add(df, var_type, var_modality, db=None):
     """ Add features for samples into database from input CSV
-    :param input_file:
+    :param df: Dataframe
     :param var_type:
     :param var_modality:
     :param db:
     :return:
     """
     db = db or store.Database()
-    df = pd.read_csv(input_file)
     var_type = d.Feature.Variable.Type.Value(var_type)
     var_mode = d.Feature.Modality.Type.Value(var_modality)
     for _, r in df.dropna().iterrows():
         s = db.load_sample(r['sha256'])
         if s is None:
-            log.warning("%s: Not in sample db", r['sha256'])
+            # log.warning("%s: Not in sample db", r['sha256'])
             continue
         for k in r.keys():
             if k != 'sha256':
                 s.add(k, r[k], var_type=var_type, var_mode=var_mode)
-                log.debug("%s: Added feature %s - %s", r['sha256'], k, r[k])
+                # log.debug("%s: Added feature %s - %s", r['sha256'], k, r[k])
         db.insert_sample_features(s.sha256, s.serialize())
 
 

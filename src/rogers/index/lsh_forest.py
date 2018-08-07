@@ -15,13 +15,11 @@ class Index(BaseIndex):
 
     name = 'lsh_forest'
 
-    def fit(self, samples):
+    def _fit(self, xs):
         """ Fit index
         :param samples: list of Samples
         :return:
         """
-        xs, self.ys = self.transform(samples)
-        log.info("Transformed samples to (%s, %s)" % xs.shape)
         self.index = LSHForest(n_estimators=self.parameters.get('n_estimators', 20))
         self.index.fit(xs)
 

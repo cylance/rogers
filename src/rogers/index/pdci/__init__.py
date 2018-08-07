@@ -17,14 +17,13 @@ class Index(BaseIndex):
 
     name = 'pdci'
 
-    def fit(self, samples):
+    def _fit(self, xs):
         """ Fit PDCI index
-        :param samples: list of Samples
-        :param kwargs: optional index parameters
+        :param xs: list of Samples
         :return:
         """
-        xs, self.ys = self.transform(samples)
         self.index = self._index()
+        self.index.fit(xs)
 
     def _index(self):
         return PrioritizedDynamicContinuousIndex(SQLiteIndexer(),

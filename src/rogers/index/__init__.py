@@ -2,6 +2,7 @@
 """
 from .. import config as c
 from .. import store
+from ..sample import Sample
 from ..logger import get_logger
 
 import os
@@ -38,7 +39,7 @@ class Index(object):
 
     name = 'base'
 
-    def __init__(self, db=None, **parameters):
+    def __init__(self, db=None, pipeline=None, **parameters):
         """ Base attributes
         """
         self.db = db or store.Database()
@@ -46,7 +47,7 @@ class Index(object):
         self.ys = None
         self.parameters = parameters
         try:
-            self.pipeline = joblib.load(c.index_path('pipeline.pkl'))
+            self.pipeline = pipeline or joblib.load(c.index_path('pipeline.pkl'))
         except FileNotFoundError:
             log.info("pipeline not available or fit")
             self.pipeline = None
@@ -78,21 +79,6 @@ class Index(object):
         xs = self.pipeline.transform(samples)
         return xs, ys
 
-    @staticmethod
-    def fit_pipeline(pipeline, samples):
-        """ Fit the vectorizer
-        :return:
-        """
-        pipeline.fit(samples)
-        xs = pipeline.fit_transform(samples)
-        ys = np.array([s.sha256 for s in samples])
-        log.info("Fit and transformed samples to %s", xs.shape)
-
-        log.info("Exporting pipeline files")
-        joblib.dump(xs, c.index_path('xs.pkl'))
-        joblib.dump(ys, c.index_path('ys.pkl'))
-        joblib.dump(pipeline, c.index_path('pipeline.pkl'))
-
     def load(self):
         """ Load index from local storage
         :return:
@@ -107,9 +93,23 @@ class Index(object):
         joblib.dump(self.index, "%s.index" % self.index_file_prefix)
         joblib.dump(self.ys, "%s.ys" % self.index_file_prefix)
 
-    def fit(self, samples):
+    def fit(self, samples, ys=None):
         """ Fit samples into index
-        :param samples: List of Sample instances
+        :param samples: List of Sample instances or Numpy array / sparse matrix
+        :param ys: List of index sha256 values that maps to
+        :return:
+        """
+        if isinstance(samples, list) and isinstance(samples[0], Sample):
+            xs, self.ys = self.transform(samples)
+        else:
+            xs = samples
+            if ys is not None:
+                self.ys = ys
+        return self._fit(xs)
+
+    def _fit(self, xs):
+        """ Fit samples into index
+        :param xs: Numpy array or sparse matrix
         :return:
         """
         raise NotImplementedError
@@ -132,6 +132,15 @@ class Index(object):
         neighbors = self._query(sample, k, **kwargs)
         neighbors = self._nearest_k(sample, neighbors, k)
         return self._load_neighbor_samples(result, neighbors)
+
+    def _query(self, sample, k=10, **kwargs):
+        """ Query index and return
+        :param sample: Sample
+        :param k: number of nearest neighbors to return from index
+        :param kwargs: additional kwargs to pass to index query
+        :return:
+        """
+        raise NotImplementedError
 
     def _load_neighbor_samples(self, result, neighbors):
         """ Load neighbor samples for result
@@ -157,15 +166,6 @@ class Index(object):
         if len(neighbors) > k:
             neighbors = neighbors[:k]
         return neighbors
-
-    def _query(self, sample, k=10, **kwargs):
-        """ Query index and return
-        :param sample: Sample
-        :param k: number of nearest neighbors to return from index
-        :param kwargs: additional kwargs to pass to index query
-        :return:
-        """
-        raise NotImplementedError
 
     def query_samples(self, seed_samples, k=5, include_neighbors=False, **kwargs):
         """ Query seed samples optionally including neighbor of neighbors
