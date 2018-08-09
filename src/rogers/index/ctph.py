@@ -4,6 +4,7 @@ Implementation based on https://www.virusbulletin.com/virusbulletin/2015/11/opti
 """
 from ..store import Database
 from ..logger import get_logger
+from .. import store
 from .. import config as c
 from . import Index as BaseIndex
 
@@ -51,11 +52,13 @@ class Index(BaseIndex, Database):
 
     name = 'ctph'
 
-    def __init__(self):
+    def __init__(self, db=None):
         """ Setup ctph sqlite database connection
+        :param db:
         """
         self.index_path = os.path.join(c.settings.get('INDEX_DIR'), 'ctph.index')
         self._db = None
+        self.db = db or store.Database()
         self.connect()
 
     def initialize(self):

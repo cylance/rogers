@@ -7,6 +7,7 @@ from ..logger import get_logger
 from sklearn.pipeline import Pipeline, FeatureUnion
 from sklearn.preprocessing import Normalizer
 from sklearn.decomposition import TruncatedSVD
+from sklearn.random_projection import SparseRandomProjection
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.feature_extraction.text import FeatureHasher
 
@@ -53,17 +54,18 @@ def online_pe_pipeline():
         ('vectorize', FeatureUnion(
             transformer_list=[
                 ('signatures', Pipeline([
-                    ('vectorizer', SignatureDictVectorizer(vectorizer=FeatureHasher(1024))),
+                    ('vectorizer', SignatureDictVectorizer(vectorizer=FeatureHasher(2048))),
                 ])),
                 ('header', Pipeline([
-                    ('vectorizer', HeaderVectorizer(FeatureHasher(2048))),
+                    ('vectorizer', HeaderVectorizer(FeatureHasher(4096))),
                 ])),
                 ('sym_imports', Pipeline([
-                    ('vectorizer', SymImportsDictVectorizer(FeatureHasher(512))),
+                    ('vectorizer', SymImportsDictVectorizer(FeatureHasher(1024))),
                 ])),
                 ('sym_exports', Pipeline([
-                    ('vectorizer', SymExportsDictVectorizer(FeatureHasher(256))),
+                    ('vectorizer', SymExportsDictVectorizer(FeatureHasher(1024))),
                 ])),
             ],
         )),
+        ('projection', SparseRandomProjection(n_components=256, dense_output=True)),
     ])

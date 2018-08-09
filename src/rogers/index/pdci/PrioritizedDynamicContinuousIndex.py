@@ -12,6 +12,7 @@ from sklearn.base import BaseEstimator
 from sklearn import random_projection
 from contextlib import contextmanager
 from sklearn.metrics import pairwise_distances
+from sklearn.preprocessing import normalize
 from hub_toolbox import IntrinsicDim
 
 
@@ -150,7 +151,7 @@ class PrioritizedDynamicContinuousIndex(BaseEstimator):
         :return:
         """
         if self._intrinsic_d is None:
-            self._intrinsic_d = IntrinsicDim.intrinsic_dimension(self.indexer.xs.toarray())
+            self._intrinsic_d = IntrinsicDim.intrinsic_dimension(self.indexer.xs)
         return self._intrinsic_d
 
     @property
@@ -166,8 +167,6 @@ class PrioritizedDynamicContinuousIndex(BaseEstimator):
         :return:
         """
         self.indexer.init(self.n_indices)
-        # TODO: See if stochastic PCA can provide better indices
-        # self.random_unit_vectors = np.vstack([self._random_unit_vector(X) for i in range(self.n_indices)])
         self.random_unit_vectors = random_projection.GaussianRandomProjection(n_components=self.n_indices)
         self.random_unit_vectors.fit(X)
         self.partial_fit(X)
@@ -252,10 +251,8 @@ class PrioritizedDynamicContinuousIndex(BaseEstimator):
                         if composite_observations[l][i] == self.simple_indices:
                             # i sample has been observed in all simple indices in composite index, add to candidate sets
                             candidate_sets[l].add(int(i))
-        # get the union of candidates in all candidate sets
+        # get the union of candidates in all candidate ets
         candidate_idxs = np.array(list(set.union(*candidate_sets)))
-        print(k_visit)
-        print(candidate_idxs)
         # candidate vectors
         candidates = self.indexer.xs[candidate_idxs]
         # distance from query vector to candidate vectors
