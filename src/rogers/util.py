@@ -1,19 +1,27 @@
 """ Utility functions and helpers
 """
-import os
-import os.path as path
-import yara
-from multiprocessing import cpu_count
-from multiprocessing.pool import Pool
+from .logger import get_logger
+from . import generated as d
 
-import pandas as pd
-import rogers.data as d
-from rogers.config import YARA_RULE_PATH
-from rogers.logger import get_logger
+
+import os
+import importlib
+import os.path as path
+
 from terminaltables import SingleTable
 
 
 log = get_logger(__name__)
+
+
+def load_class(namespace):
+    """ Python package namespace with class, e.g. module.Class
+    :param namespace:
+    :return:
+    """
+    module_name, class_name = namespace.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+    return getattr(module, class_name)
 
 
 def print_sample_details(sample, use_print=False):
@@ -86,40 +94,6 @@ def enumerate_dir(dir_path):
             yield path.join(root, f)
 
 
-def load_yara_signatures(path=YARA_RULE_PATH):
-    """ Load Yara signatures
-    :param path:
-    :return:
-    """
-    rules = yara.compile(YARA_RULE_PATH)
-    return rules
-
-
-def to_ascii(s):
-    """ Force string to ascii
-    :param s:
-    :return:
-    """
-    s = s.split(b'\x00', 1)[0]
-    return s.decode('ascii', 'ignore').lower()
-
-
-def loword(dword):
-    """ Low order word
-    :param dword:
-    :return:
-    """
-    return dword & 0x0000ffff
-
-
-def hiword(dword):
-    """ High order word
-    :param dword:
-    :return:
-    """
-    return dword >> 16
-
-
 def chunks(l, n):
     """ Split list l into n chunks
     :param l:
@@ -130,67 +104,16 @@ def chunks(l, n):
         yield l[i:i + n]
 
 
-def ipmap(fcn, args, pool_size=cpu_count() - 1):
-    """ Iter pmap
-    :param args:
-    :param pool_size:
-    :return:
+def sha256_key(sha256):
+    """ Create key from sha256
+    :param sha256: hashval
+    :return: path to return
+    :rtype: str
     """
-    with Pool(processes=pool_size) as pool:
-        for i in pool.imap_unordered(fcn, args):
-            yield i
-
-
-def dispatch(fcn, args, consumer=default_consumer, pool_size=cpu_count() - 1):
-    """ Distpatch a function over process pool and pass results to consumer
-    :param fcn:
-    :param args:
-    :param consumer:
-    :param pool_size:
-    :return:
-    """
-    for i in ipmap(fcn, args, pool_size):
-        consumer(i)
-
-
-def preprocess(db, preprocessor, sample_paths, filter_hashvals=None):
-    """ Process sample paths
-    :param db:
-    :param preprocessor:
-    :param sample_paths:
-    :param filter_hashvals:
-    :return:
-    """
-
-    sample_hashval_and_filepath = {}
-
-    def consumer(msg):
-        if msg is not None:
-            sample_path, hashval = msg
-            sample_hashval_and_filepath[hashval] = sample_path
-
-    dispatch(preprocessor, sample_paths, consumer=consumer)
-    log.info("Identified %s unique samples", len(sample_hashval_and_filepath))
-
-    if filter_hashvals is not None:
-        sample_paths = [sample_path for hashval, sample_path in sample_hashval_and_filepath.items() if hashval in filter_hashvals]
-    else:
-        sample_paths = [sample_path for hashval, sample_path in sample_hashval_and_filepath.items() if not db.sample_features_exists(hashval)]
-    return sample_paths, len(sample_paths)
-
-
-def samples_from_args(db, args):
-    """ Get sample or samples from args
-    :param args:
-    :return: list of Samples
-    """
-    if args.input:
-        hashvals = set(pd.read_csv(args.input)['sha256'].tolist())
-        log.info("Loading samples for %s input hashes for index command", len(hashvals))
-        return [s for s in map(db.load_sample, hashvals) if s is not None]
-    elif hasattr(args, 'hashval') and args.hashval:
-        log.info("Loading %s hashvals" % len(args.hashval))
-        return [s for s in map(db.load_sample, args.hashval) if s is not None]
-    else:
-        log.info("Loading %s samples from db", db.n)
-        return [s for s in db.get_samples()]
+    try:
+        path = "%s%s/%s%s/%s%s/%s%s/%s" % (
+            sha256[0], sha256[1], sha256[2], sha256[3], sha256[4],
+            sha256[5], sha256[6], sha256[7], sha256)
+    except IndexError:
+        return sha256
+    return path

@@ -1,10 +1,10 @@
 """ LSH Forest using scikit-learn
 """
+from . import Index as BaseIndex
+from ..logger import get_logger
+
 from sklearn.neighbors import LSHForest
 
-from . import Index as BaseIndex
-
-from rogers.logger import get_logger
 
 log = get_logger(__name__)
 
@@ -15,15 +15,12 @@ class Index(BaseIndex):
 
     name = 'lsh_forest'
 
-    def fit(self, samples, **kwargs):
+    def _fit(self, xs):
         """ Fit index
         :param samples: list of Samples
-        :param kwargs: optional index parameters
         :return:
         """
-        xs, self.ys = self.transform(samples)
-        log.info("Transformed samples to (%s, %s)" % xs.shape)
-        self.index = LSHForest(n_estimators=kwargs.get('n_estimators', 20))
+        self.index = LSHForest(n_estimators=self.parameters.get('n_estimators', 20))
         self.index.fit(xs)
 
     def _query(self, sample,  k=5, **kwargs):
@@ -38,5 +35,5 @@ class Index(BaseIndex):
         neighbors = []
         for idx, d in zip(idxs[0], distances[0]):
             hashval = self.ys[idx]
-            neighbors.append({'hashval': hashval, 'similarity': 1 - float(d)})
+            neighbors.append({'hashval': hashval, 'similarity': min(1 - float(d), 1.0)})
         return neighbors

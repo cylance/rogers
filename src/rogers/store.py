@@ -1,11 +1,13 @@
 """ Local sqlite db
 """
+from .logger import get_logger
+from . import config as c
+from .sample import Sample
+
 import os
 import sqlite3
 from contextlib import contextmanager
-import rogers.sample.pe as pe
-from rogers.logger import get_logger
-import rogers.config as c
+
 
 log = get_logger(__name__)
 
@@ -29,8 +31,8 @@ COMMIT;
 
 class Database(object):
 
-    def __init__(self, index_path=os.path.join(c.settings.get('INDEX_DIR'), 'metadata.db')):
-        self.index_path = index_path
+    def __init__(self, index_path=None):
+        self.index_path = index_path or os.path.join(c.settings.get('INDEX_DIR'), 'metadata.db')
         self._db = None
         self.connect()
 
@@ -81,7 +83,7 @@ class Database(object):
                 if not batch:
                     break
                 for feature_blob in batch:
-                    yield pe.PE(None, features=pe.PE.deserialize(feature_blob[0]))
+                    yield Sample.deserialize(feature_blob[0])
 
     def get_sample_feature_blob(self, hashval):
         """ Get feature bytes for sample by hashval
@@ -97,6 +99,7 @@ class Database(object):
     def load_samples(self, hashvals):
         """ Load samples for hashvals
         :param hashvals:
+        :param sample_class:
         :return: list of Sample
         """
         samples = []
@@ -112,8 +115,7 @@ class Database(object):
         :return:
         """
         if self.sample_features_exists(hashval):
-            features = pe.PE.deserialize(self.get_sample_feature_blob(hashval))
-            return pe.PE(None, features=features)
+            return Sample.deserialize(self.get_sample_feature_blob(hashval))
 
     def sample_features_exists(self, hashval):
         """ Check if sample features exist in database
@@ -128,15 +130,15 @@ class Database(object):
                     return True
         return False
 
-    def insert_sample_features(self, hashval, features):
+    def insert_sample_features(self, hashval, sample_msg):
         """ Insert sample features into database
         :param hashval:
-        :param features:
+        :param sample_msg:
         :return:
         """
         sample_id = self.lookup_or_insert_sample(hashval)
         with self.cursor() as cursor:
-            cursor.execute("INSERT OR REPLACE INTO sample_feature (id, features) VALUES (?, ?);", (sample_id, features,))
+            cursor.execute("INSERT OR REPLACE INTO sample_feature (id, features) VALUES (?, ?);", (sample_id, sample_msg,))
 
     def lookup_or_insert_sample(self, hashval):
         ret = self._lookup_sample(hashval)
@@ -164,4 +166,3 @@ class Database(object):
         finally:
             self._db.commit()
             cur.close()
-

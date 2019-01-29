@@ -1,53 +1,13 @@
 """ Static PE vectorizer
 """
-
-from sklearn.base import BaseEstimator, TransformerMixin
-
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.feature_extraction import DictVectorizer
+from .BaseVectorizer import BaseVectorizer
 
 
-class PEVectorizer(BaseEstimator, TransformerMixin):
-    """ Base class
-    """
-
-    def __init__(self):
-        self.v = DictVectorizer(sparse=True)
-
-    @staticmethod
-    def explode(s):
-        """ Preprocess sample for vectorizers
-        :param s: Sample instance
-        :return:
-        """
-        raise NotImplementedError
-
-    def transform(self, samples):
-        """ Fit the
-        :param samples:
-        :return:
-        """
-        return self.v.transform(map(self.explode, samples))
-
-    def fit(self, samples, ys=None):
-        """ Fit the
-        :param samples:
-        :param ys:
-        :return:
-        """
-        self.v.fit(map(self.explode, samples))
-        return self
-
-
-class HeaderVectorizer(PEVectorizer):
+class HeaderVectorizer(BaseVectorizer):
     """ PE header features using spare DictVectorizer
     """
 
-    def __init__(self):
-        self.v = DictVectorizer(sparse=True)
-
-    @staticmethod
-    def explode(s):
+    def explode(self, s):
         """ Preprocess sample for vectorizers
         :param s: Sample instance
         :return:
@@ -64,15 +24,11 @@ class HeaderVectorizer(PEVectorizer):
         return x
 
 
-class SymImportsVectorizer(PEVectorizer):
-    """ TF-IDF on imported symbols
+class SymImportsVectorizer(BaseVectorizer):
+    """ Imported symbols
     """
 
-    def __init__(self):
-        self.v = TfidfVectorizer(sublinear_tf=True, min_df=2, max_df=0.80)
-
-    @staticmethod
-    def explode(s):
+    def explode(self, s):
         """ Preprocess sample for vectorizers
         :param s: Sample instance
         :return:
@@ -82,15 +38,11 @@ class SymImportsVectorizer(PEVectorizer):
         return x
 
 
-class SymExportsVectorizer(PEVectorizer):
-    """ TF-IDF on exported symbols
+class SymExportsVectorizer(BaseVectorizer):
+    """ Exported symbols
     """
 
-    def __init__(self):
-        self.v = TfidfVectorizer(sublinear_tf=True, min_df=1, max_df=0.80)
-
-    @staticmethod
-    def explode(s):
+    def explode(self, s):
         """ Preprocess sample for vectorizers
         :param s: Sample instance
         :return:
@@ -99,3 +51,33 @@ class SymExportsVectorizer(PEVectorizer):
         x = " ".join(v) if v is not None else ''
         x = x if len(x) else ''
         return x
+
+
+class SymImportsDictVectorizer(BaseVectorizer):
+    """ Imported symbols
+    """
+
+    def explode(self, s):
+        """ Preprocess sample for vectorizers
+        :param s: Sample instance
+        :return:
+        """
+        syms = {}
+        for sym in s.get("header.import_syms"):
+            syms[sym] = 1
+        return syms
+
+
+class SymExportsDictVectorizer(BaseVectorizer):
+    """ Exported symbols
+    """
+
+    def explode(self, s):
+        """ Preprocess sample for vectorizers
+        :param s: Sample instance
+        :return:
+        """
+        syms = {}
+        for sym in s.get("header.export_syms"):
+            syms[sym] = 1
+        return syms

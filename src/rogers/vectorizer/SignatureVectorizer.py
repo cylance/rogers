@@ -1,17 +1,11 @@
 """ TF-IDF on signatures
 """
-
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.feature_extraction.text import TfidfVectorizer
+from .BaseVectorizer import BaseVectorizer
 
 
-class SignatureVectorizer(BaseEstimator, TransformerMixin):
+class SignatureVectorizer(BaseVectorizer):
 
-    def __init__(self):
-        self.vectorizer = TfidfVectorizer(sublinear_tf=True)
-
-    @staticmethod
-    def explode(s):
+    def explode(self, s):
         """ Preprocess sample for vectorizers
         :param s: Sample instance
         :return:
@@ -19,18 +13,15 @@ class SignatureVectorizer(BaseEstimator, TransformerMixin):
         sigs = s.get('static.signatures')
         return " ".join(sigs) if sigs is not None else ''
 
-    def transform(self, samples):
-        """ Fit the
-        :param samples:
-        :return:
-        """
-        return self.vectorizer.transform(map(self.explode, samples))
 
-    def fit(self, samples, ys=None):
-        """ Fit the
-        :param samples:
-        :param ys:
+class SignatureDictVectorizer(BaseVectorizer):
+
+    def explode(self, s):
+        """ Preprocess sample for vectorizers
+        :param s: Sample instance
         :return:
         """
-        self.vectorizer.fit(map(self.explode, samples))
-        return self
+        sigs = {}
+        for s in s.get('static.signatures'):
+            sigs[s] = 1
+        return sigs

@@ -1,10 +1,10 @@
 """ Configuration for Rogers
 """
+from .util import get_logger
+
 import os
 import configparser
 from os import path as path
-
-from rogers.logger import get_logger
 
 log = get_logger(__name__)
 
@@ -30,6 +30,14 @@ settings = {'SAMPLE_DIR': DEFAULT_SAMPLE_DIR,
             'INDEX_DIR': DEFAULT_INDEX_DIR}
 
 
+def get(key):
+    global settings
+    if key in settings:
+        return settings[key]
+    else:
+        raise IndexError("Configuration key doesn't not exist! - %s", key)
+
+
 def sample_path(path):
     return os.path.join(settings.get('SAMPLE_DIR'), path)
 
@@ -38,7 +46,7 @@ def index_path(path):
     return os.path.join(settings.get('INDEX_DIR'), path)
 
 
-def configure(cfg_path):
+def configure(cfg_path=None):
     """ Load rogers conf file and set environment
     :param cfg_path:
     :return:
@@ -52,6 +60,10 @@ def configure(cfg_path):
     settings['SAMPLE_DIR'] = os.path.abspath(config.get('rogers', 'sample_dir', fallback=DEFAULT_SAMPLE_DIR))
     settings['INDEX_DIR'] = os.path.abspath(config.get('rogers', 'index_dir', fallback=DEFAULT_INDEX_DIR))
 
+    # XOR
+    settings['XORI_PATH'] = os.path.abspath(config.get('xori', 'bin_path', fallback=''))
+    settings['XORI_CONF_PATH'] = os.path.abspath(config.get('xori', 'conf_path', fallback=''))
+
     settings['VT_API_KEY'] = config.get('virustotal', 'api_key', fallback='')
 
     sample_dir = settings.get('SAMPLE_DIR')
@@ -62,5 +74,3 @@ def configure(cfg_path):
 
     log.debug("Sample Directory: %s", sample_dir)
     log.debug("Index Directory: %s", index_dir)
-
-configure(DEFAULT_CONF_PATH)

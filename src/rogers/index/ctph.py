@@ -2,16 +2,18 @@
 
 Implementation based on https://www.virusbulletin.com/virusbulletin/2015/11/optimizing-ssdeep-use-scale/
 """
+from ..store import Database
+from ..logger import get_logger
+from .. import store
+from .. import config as c
+from . import Index as BaseIndex
+
+
 import os
 import ssdeep
 import base64
 from struct import unpack
 
-from . import Index as BaseIndex
-
-from rogers.store import Database
-from rogers.logger import get_logger
-import rogers.config as c
 
 log = get_logger(__name__)
 
@@ -50,11 +52,13 @@ class Index(BaseIndex, Database):
 
     name = 'ctph'
 
-    def __init__(self):
+    def __init__(self, db=None):
         """ Setup ctph sqlite database connection
+        :param db:
         """
         self.index_path = os.path.join(c.settings.get('INDEX_DIR'), 'ctph.index')
         self._db = None
+        self.db = db or store.Database()
         self.connect()
 
     def initialize(self):
@@ -112,10 +116,9 @@ class Index(BaseIndex, Database):
         for s in xs:
             self.add(s)
 
-    def fit(self, samples, **kwargs):
+    def fit(self, samples):
         """ Fit the index
         :param samples:
-        :param kwargs:
         :return:
         """
         self.reset()

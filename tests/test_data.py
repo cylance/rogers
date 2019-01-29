@@ -2,11 +2,11 @@
 """
 from mock import patch
 
-import rogers.data as d
+import rogers.generated as d
 
 
 def test_init():
-    import rogers.data.features_pb2
+    import rogers.generated.feature_pb2
 
 
 def test_feature():

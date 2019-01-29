@@ -1,21 +1,30 @@
 """ Base class for file types
 """
+from .. import generated as d
+from ..logger import get_logger
+from ..config import YARA_RULE_PATH
+from ..util import load_class
+
 import yara
 import io
 import gzip
 import hashlib
 import tempfile
 from contextlib import contextmanager
-import rogers.data as d
-import rogers.util as u
 
-from rogers.logger import get_logger
 
 log = get_logger(__name__)
 
 
 # compiled yara signatures
-YARA = u.load_yara_signatures()
+_YARA = None
+
+
+def yara_rules():
+    global _YARA
+    if _YARA is None:
+        _YARA = yara.compile(YARA_RULE_PATH)
+    return _YARA
 
 
 class Unsupported(Exception):
@@ -24,7 +33,7 @@ class Unsupported(Exception):
 
 class Sample(object):
 
-    def __init__(self, local_path, features=None):
+    def __init__(self, local_path=None, features=None):
         """ Setup sample class with path to sample and optional feature data
         :param local_path:
         :param features:
@@ -33,6 +42,7 @@ class Sample(object):
         self._sha256 = None
         if features is None:
             self.features = d.Features()
+            self.features.namespace = "%s.%s" % (self.__module__, self.__class__.__qualname__)
         else:
             self._sha256 = features.sha256
             self.features = features
@@ -44,7 +54,7 @@ class Sample(object):
         """
         yara_matches = []
         try:
-            yara_matches = YARA.match(path, timeout=30)
+            yara_matches = yara_rules().match(path, timeout=30)
         except (yara.Error, yara.TimeoutError):
             pass
         return [str(m) for m in yara_matches]
@@ -78,7 +88,8 @@ class Sample(object):
         with gzip.GzipFile(fileobj=in_, mode='rb') as fo:
             features = d.Features()
             features.ParseFromString(fo.read())
-        return features
+        sample_class = load_class(features.namespace)
+        return sample_class(features=features)
 
     def serialize(self):
         """ Serialize features message to bytes
@@ -152,6 +163,22 @@ class Sample(object):
                 h.update(chunk)
             self._sha256 = h.hexdigest().upper()
         return self._sha256
+
+    @staticmethod
+    def process(sample_path):
+        """ Extract feature data
+        :param sample_path:
+        :return:
+        """
+        raise NotImplementedError
+
+    @staticmethod
+    def preprocessor(sample_path):
+        """ Calculate sha256 of sample
+        :param sample_path:
+        :return:
+        """
+        raise NotImplementedError
 
     def extract(self):
         """ Perform raw feature extraction

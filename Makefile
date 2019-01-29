@@ -6,7 +6,7 @@ TARBALL := dist/$(NAME)-$(VERSION).tar.gz
 all: compile test clean-build build
 
 compile:
-	protoc -I=proto/ --python_out=src/rogers/data proto/features.proto
+	protoc -I=proto/ --python_out=src/rogers/generated proto/*.proto
 
 test: env
 	env/bin/pytest tests

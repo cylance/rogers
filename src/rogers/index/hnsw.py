@@ -3,12 +3,13 @@
 Based on http://arxiv.org/abs/1603.09320
 
 """
+from . import Index as BaseIndex
+from ..logger import get_logger
+from .. import config as c
+
 import nmslib
 from sklearn.externals import joblib
 
-from . import Index as BaseIndex
-from rogers.logger import get_logger
-import rogers.config as c
 
 log = get_logger(__name__)
 
@@ -19,18 +20,16 @@ class Index(BaseIndex):
 
     name = 'hnsw'
 
-    def fit(self, samples, **kwargs):
+    def _fit(self, xs):
         """ Fit HNSW index
         :param samples: list of Samples
-        :param kwargs: optional index parameters
         :return:
         """
-        xs, self.ys = self.transform(samples)
         self.index = nmslib.init(method='hnsw', space='cosinesimil')
         self.index.addDataPointBatch(xs)
-        self.index.createIndex({'post': kwargs.get('post', 0),
-                                'efConstruction': kwargs.get('efConstruction', 400),
-                                'M': kwargs.get('M', 12)})
+        self.index.createIndex({'post': self.parameters.get('post', 0),
+                                'efConstruction': self.parameters.get('efConstruction', 400),
+                                'M': self.parameters.get('M', 12)})
 
     def _query(self, sample, k=1, **kwargs):
         """ Query samples
@@ -45,7 +44,7 @@ class Index(BaseIndex):
         neighbors = []
         for idx, d in zip(idxs, distances):
             hashval = self.ys[idx]
-            neighbors.append({'hashval': hashval, 'similarity': 1 - float(d)})
+            neighbors.append({'hashval': hashval, 'similarity': min(1 - float(d), 1.0)})
         return neighbors
 
     def load(self):

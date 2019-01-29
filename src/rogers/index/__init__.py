@@ -1,42 +1,30 @@
 """ Base class for different nearest neighbor search methods
 """
+from .. import config as c
+from .. import store
+from ..sample import Sample
+from ..logger import get_logger
+
 import os
 import numpy as np
 from sklearn.externals import joblib
 from importlib import import_module
 from operator import itemgetter
 
-import rogers.config as c
-import rogers.store as store
-
-from rogers.logger import get_logger
-
 
 log = get_logger(__name__)
 
-DB = store.Database()
 
-
-def list_available_index():
-    """ Dynamically identify available index modules in index/
-    :return: name of module file without ext
-    """
-    l = []
-    for name in os.listdir(os.path.join(c.MODULE_DIR, "index")):
-        if name.endswith(".py") and name != '__init__.py':
-            l.append(name.replace('.py', ''))
-    return l
-
-
-def init(name):
+def index(name, *args, **kwargs):
     """ Dynamically load a model class and instantiate
     :param name:
+    :param sample_class:
     :return:
     """
     try:
         index_mod_name = "rogers.index.%s" % name
         mod = import_module("rogers.index.%s" % name)
-        idx = mod.Index()
+        idx = mod.Index(*args, **kwargs)
     except ModuleNotFoundError:
         log.fatal("%s index is not available", name)
         raise SystemExit(-1)
@@ -51,14 +39,15 @@ class Index(object):
 
     name = 'base'
 
-    def __init__(self):
+    def __init__(self, db=None, pipeline=None, **parameters):
         """ Base attributes
         """
-        self.model = None
+        self.db = db or store.Database()
         self.index = None
         self.ys = None
+        self.parameters = parameters
         try:
-            self.pipeline = joblib.load(c.index_path('pipeline.pkl'))
+            self.pipeline = pipeline or joblib.load(c.index_path('pipeline.pkl'))
         except FileNotFoundError:
             log.info("pipeline not available or fit")
             self.pipeline = None
@@ -70,6 +59,18 @@ class Index(object):
         """
         return c.index_path(self.name)
 
+    @staticmethod
+    def list_available_index():
+        """ Dynamically identify available index modules in index/
+        :return: name of module file without ext
+        """
+        l = []
+        for name in os.listdir(os.path.join(c.MODULE_DIR, "index")):
+            if name.endswith(".py") and name != '__init__.py':
+                l.append(name.replace('.py', ''))
+        l.append('pdci')
+        return l
+
     def transform(self, samples):
         """ Transform samples to xs, ys
         :param samples:
@@ -78,21 +79,6 @@ class Index(object):
         ys = np.array([s.sha256 for s in samples])
         xs = self.pipeline.transform(samples)
         return xs, ys
-
-    @staticmethod
-    def fit_transform(pipeline, samples):
-        """ Fit the vectorizer
-        :return:
-        """
-        pipeline.fit(samples)
-        xs = pipeline.fit_transform(samples)
-        ys = np.array([s.sha256 for s in samples])
-        log.info("Fit and transformed samples to %s", xs.shape)
-
-        log.info("Exporting pipeline files")
-        joblib.dump(xs, c.index_path('xs.pkl'))
-        joblib.dump(ys, c.index_path('ys.pkl'))
-        joblib.dump(pipeline, c.index_path('pipeline.pkl'))
 
     def load(self):
         """ Load index from local storage
@@ -108,10 +94,23 @@ class Index(object):
         joblib.dump(self.index, "%s.index" % self.index_file_prefix)
         joblib.dump(self.ys, "%s.ys" % self.index_file_prefix)
 
-    def fit(self, samples, **kwargs):
+    def fit(self, samples, ys=None):
         """ Fit samples into index
-        :param samples: List of Sample
-        :param kwargs: additional kwargs to pass to index fit
+        :param samples: List of Sample instances or Numpy array / sparse matrix
+        :param ys: List of index sha256 values that maps to
+        :return:
+        """
+        if isinstance(samples, list) and isinstance(samples[0], Sample):
+            xs, self.ys = self.transform(samples)
+        else:
+            xs = samples
+            if ys is not None:
+                self.ys = ys
+        return self._fit(xs)
+
+    def _fit(self, xs):
+        """ Fit samples into index
+        :param xs: Numpy array or sparse matrix
         :return:
         """
         raise NotImplementedError
@@ -135,6 +134,15 @@ class Index(object):
         neighbors = self._nearest_k(sample, neighbors, k)
         return self._load_neighbor_samples(result, neighbors)
 
+    def _query(self, sample, k=10, **kwargs):
+        """ Query index and return
+        :param sample: Sample
+        :param k: number of nearest neighbors to return from index
+        :param kwargs: additional kwargs to pass to index query
+        :return:
+        """
+        raise NotImplementedError
+
     def _load_neighbor_samples(self, result, neighbors):
         """ Load neighbor samples for result
         :param result:
@@ -142,7 +150,7 @@ class Index(object):
         :return:
         """
         for nbr in neighbors:
-            sample = DB.load_sample(nbr['hashval'])
+            sample = self.db.load_sample(nbr['hashval'])
             result['neighbors'].append((sample, nbr['similarity']))
         return result
 
@@ -159,15 +167,6 @@ class Index(object):
         if len(neighbors) > k:
             neighbors = neighbors[:k]
         return neighbors
-
-    def _query(self, sample, k=10, **kwargs):
-        """ Query index and return
-        :param sample: Sample
-        :param k: number of nearest neighbors to return from index
-        :param kwargs: additional kwargs to pass to index query
-        :return:
-        """
-        raise NotImplementedError
 
     def query_samples(self, seed_samples, k=5, include_neighbors=False, **kwargs):
         """ Query seed samples optionally including neighbor of neighbors
@@ -192,7 +191,7 @@ class Index(object):
                 if nbr['hashval'] not in query_hashvals:
                     neighbor_hashvals.add(nbr['hashval'])
 
-        neighbor_samples = DB.load_samples(list(neighbor_hashvals))
+        neighbor_samples = self.db.load_samples(list(neighbor_hashvals))
 
         if include_neighbors:
             nbr_multiple_results = list(map(lambda s: {'query': s,
@@ -206,7 +205,7 @@ class Index(object):
                     if nbr['hashval'] not in query_hashvals and nbr['hashval'] not in neighbor_hashvals:
                         expanded_neighbor_hashvals.add(nbr['hashval'])
 
-            neighbor_samples += DB.load_samples(list(expanded_neighbor_hashvals))
+            neighbor_samples += self.db.load_samples(list(expanded_neighbor_hashvals))
 
             tmp_multiple_results += nbr_multiple_results
 

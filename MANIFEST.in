@@ -1,5 +1,6 @@
 include requirements.txt
 include VERSION
+include LICENSE
 include README.md
 recursive-include src/rogers/data/yara *
 include src/rogers/default.ini
