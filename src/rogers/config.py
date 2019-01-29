@@ -30,6 +30,14 @@ settings = {'SAMPLE_DIR': DEFAULT_SAMPLE_DIR,
             'INDEX_DIR': DEFAULT_INDEX_DIR}
 
 
+def get(key):
+    global settings
+    if key in settings:
+        return settings[key]
+    else:
+        raise IndexError("Configuration key doesn't not exist! - %s", key)
+
+
 def sample_path(path):
     return os.path.join(settings.get('SAMPLE_DIR'), path)
 
@@ -51,6 +59,10 @@ def configure(cfg_path=None):
 
     settings['SAMPLE_DIR'] = os.path.abspath(config.get('rogers', 'sample_dir', fallback=DEFAULT_SAMPLE_DIR))
     settings['INDEX_DIR'] = os.path.abspath(config.get('rogers', 'index_dir', fallback=DEFAULT_INDEX_DIR))
+
+    # XOR
+    settings['XORI_PATH'] = os.path.abspath(config.get('xori', 'bin_path', fallback=''))
+    settings['XORI_CONF_PATH'] = os.path.abspath(config.get('xori', 'conf_path', fallback=''))
 
     settings['VT_API_KEY'] = config.get('virustotal', 'api_key', fallback='')
 

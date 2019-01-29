@@ -7,7 +7,7 @@ import rogers.vectorizer
 def test_pe():
     import rogers.vectorizer.PEVectorizer as v
 
-    a = v.PEVectorizer()
+    a = v.BaseVectorizer()
 
     b = v.HeaderVectorizer()
 

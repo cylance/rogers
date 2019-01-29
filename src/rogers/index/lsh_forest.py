@@ -35,5 +35,5 @@ class Index(BaseIndex):
         neighbors = []
         for idx, d in zip(idxs[0], distances[0]):
             hashval = self.ys[idx]
-            neighbors.append({'hashval': hashval, 'similarity': 1 - float(d)})
+            neighbors.append({'hashval': hashval, 'similarity': min(1 - float(d), 1.0)})
         return neighbors

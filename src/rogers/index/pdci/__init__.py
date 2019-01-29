@@ -43,23 +43,24 @@ class Index(BaseIndex):
         neighbors = []
         for idx, d in zip(idxs, distances):
             hashval = self.ys[idx]
-            neighbors.append({'hashval': hashval, 'similarity': 1 - float(d)})
+            neighbors.append({'hashval': hashval, 'similarity': float(d)})
         return neighbors
 
     def load(self):
         """ Load index from local storage
         :return:
         """
-        self.ys = joblib.load("%s.ys" % self.index_file_prefix)
         self.parameters = joblib.load("%s.params.pk" % self.index_file_prefix)
         self.index = self._index()
         self.index.ys = self.ys
         self.index.random_unit_vectors = joblib.load("%s.random.unit_vectors.pk" % self.index_file_prefix)
+        self.index.indexer.xs = joblib.load("%s.xs" % self.index_file_prefix)
 
     def save(self):
         """ Save index to local storage
         :return:
         """
         joblib.dump(self.ys, "%s.ys" % self.index_file_prefix)
+        joblib.dump(self.index.indexer.xs, "%s.xs" % self.index_file_prefix)
         joblib.dump(self.parameters, "%s.params.pk" % self.index_file_prefix)
         joblib.dump(self.index.random_unit_vectors, "%s.random.unit_vectors.pk" % self.index_file_prefix)

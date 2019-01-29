@@ -48,9 +48,13 @@ def extract(dir_path=None, filter_hashvals=None, force=False, sample_class=pe.PE
             except Exception as e:
                 log.exception(e)
         log.info("Identified %s unique samples to copy into sample dir", len(sample_hashval_and_filepath))
+        filter_hashvals = []
         for hashval, sample_path in sample_hashval_and_filepath.items():
+            filter_hashvals.append(filter_hashvals)
             new_sample_path = os.path.join(sample_dir_path, util.sha256_key(hashval))
             try:
+                if not os.path.exists(os.path.dirname(new_sample_path)):
+                    os.makedirs(os.path.dirname(new_sample_path))
                 copyfile(sample_path, new_sample_path)
             except Exception as e:
                 log.error("%s: %s - %s", hashval, sample_path, e)
@@ -84,7 +88,7 @@ def pipeline_fit(samples):
     :param samples:
     :return:
     """
-    pipeline = vectorizer.offline_pe_pipeline()
+    pipeline = vectorizer.online_pe_pipeline()
     pipeline.fit(samples)
     xs = pipeline.fit_transform(samples)
     ys = np.array([s.sha256 for s in samples])

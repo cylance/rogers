@@ -40,11 +40,11 @@ class Index(BaseIndex):
         """
         self.index.setQueryTimeParams({'ef': kwargs.get('ef', 200)})
         x, _ = self.transform([sample])
-        idxs, distances = self.index.knnQuery(x.toarray(), k=k)
+        idxs, distances = self.index.knnQuery(x, k=k)
         neighbors = []
         for idx, d in zip(idxs, distances):
             hashval = self.ys[idx]
-            neighbors.append({'hashval': hashval, 'similarity': 1 - float(d)})
+            neighbors.append({'hashval': hashval, 'similarity': min(1 - float(d), 1.0)})
         return neighbors
 
     def load(self):

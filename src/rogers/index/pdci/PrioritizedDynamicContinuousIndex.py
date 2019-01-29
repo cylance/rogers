@@ -12,8 +12,6 @@ from sklearn.base import BaseEstimator
 from sklearn import random_projection
 from contextlib import contextmanager
 from sklearn.metrics import pairwise_distances
-from sklearn.preprocessing import normalize
-from hub_toolbox import IntrinsicDim
 
 
 class SQLiteIndexer(object):
@@ -136,7 +134,6 @@ class PrioritizedDynamicContinuousIndex(BaseEstimator):
         self.indexer = indexer
         # placeholder for random unit vector projections
         self.random_unit_vectors = None
-        self._intrinsic_d = None
 
     @property
     def n(self):
@@ -144,15 +141,6 @@ class PrioritizedDynamicContinuousIndex(BaseEstimator):
         :return:
         """
         return self.indexer.n
-
-    @property
-    def intrinsic_d(self):
-        """ Dimensionality of samples
-        :return:
-        """
-        if self._intrinsic_d is None:
-            self._intrinsic_d = IntrinsicDim.intrinsic_dimension(self.indexer.xs)
-        return self._intrinsic_d
 
     @property
     def d(self):
@@ -179,22 +167,26 @@ class PrioritizedDynamicContinuousIndex(BaseEstimator):
         xs_t = self.random_unit_vectors.transform(X)
         self.indexer.insert(X, xs_t)
 
-    def omega_k_retrieve(self, k=1):
+    def omega_k_retrieve(self, k=1, d=None):
         """ Worst case bound on number of samples to retrieve per composite index
         :param k: nearest neighbor parameter
+        :param d: intrinsic dimensionality
         :return:
         """
+        d = d or self.d
         return int(k * max(np.log(self.n / k),
                            np.power((self.n / k),
-                                    (1 - (self.simple_indices / self.intrinsic_d)))))
+                                    (1 - (self.simple_indices / d)))))
 
-    def omega_k_visit(self, k=1):
+    def omega_k_visit(self, k=1, d=None):
         """ Worst case bound on number of samples to visit across all simple indices
         :param k: nearest neighbor parameter
+        :param d: intrinsic dimensionality
         :return:
         """
+        d = d or self.d
         return int(self.simple_indices * k * max(np.log(self.n / k),
-                                                 np.power((self.n / k), (1 - (1 / self.intrinsic_d)))))
+                                                 np.power((self.n / k), (1 - (1 / d)))))
 
     def query(self, x, k=10, k_retrieve=None, k_visit=None):
         """ Query in an input sample x and return k nearest neighbors
@@ -256,7 +248,7 @@ class PrioritizedDynamicContinuousIndex(BaseEstimator):
         # candidate vectors
         candidates = self.indexer.xs[candidate_idxs]
         # distance from query vector to candidate vectors
-        raw_distances = pairwise_distances(X=x, Y=candidates, metric='euclidean', n_jobs=-1)[0]
+        raw_distances = pairwise_distances(X=x, Y=candidates, metric='euclidean', n_jobs=1)[0]
         raw_distances_idxs = np.argsort(raw_distances)[:k]
         # return k nearest candidates
         return (raw_distances[raw_distances_idxs], candidate_idxs[raw_distances_idxs].astype(int))

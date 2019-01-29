@@ -20,7 +20,7 @@ class Index(BaseIndex):
         :param samples: list of Samples
         :return:
         """
-        self.index = NearestNeighbors(self.parameters.get("algorithm", "auto"))
+        self.index = NearestNeighbors(algorithm=self.parameters.get("algorithm", "auto"))
         self.index.fit(xs)
 
     def _query(self, sample,  k=5, **kwargs):
@@ -35,5 +35,5 @@ class Index(BaseIndex):
         neighbors = []
         for idx, d in zip(idxs[0], distances[0]):
             hashval = self.ys[idx]
-            neighbors.append({'hashval': hashval, 'similarity': 1 - float(d)})
+            neighbors.append({'hashval': hashval, 'similarity': min(1 - float(d), 1)})
         return neighbors

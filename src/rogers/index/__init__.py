@@ -68,6 +68,7 @@ class Index(object):
         for name in os.listdir(os.path.join(c.MODULE_DIR, "index")):
             if name.endswith(".py") and name != '__init__.py':
                 l.append(name.replace('.py', ''))
+        l.append('pdci')
         return l
 
     def transform(self, samples):
